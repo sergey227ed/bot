@@ -72,5 +72,5 @@ app.on_startup.append(lambda _: on_startup(bot))
 setup_application(app, dp, bot=bot)
 
 # === Запуск приложения на Render ===
-if name == "main":
+if __name__ == "__main__":
     web.run_app(app, host="0.0.0.0", port=int(os.environ.get("PORT", 10000)))
