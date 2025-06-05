@@ -7,7 +7,7 @@ from aiogram.webhook.aiohttp_server import SimpleRequestHandler, setup_applicati
 from aiohttp import web
 
 # Настройки
-TOKEN = os.getenv("BOT_TOKEN")
+TOKEN = os.getenv("TOKEN")
 WEBHOOK_HOST = os.getenv("WEBHOOK_HOST", "https://твой-проект.onrender.com")  # Замени на свой
 WEBHOOK_PATH = "/webhook"
 WEBHOOK_SECRET = "supersecret"  # Любая строка
