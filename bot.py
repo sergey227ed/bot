@@ -34,3 +34,14 @@ app.on_startup.append(lambda _: on_startup(bot))
 setup_application(app, dp, bot=bot)
 
 # === Для Render просто оставь как есть, он сам запустит app ===
+if name == "main":
+    import asyncio
+    from aiohttp import web
+
+    # Создаём веб-сервер
+    app = web.Application()
+    app.router.add_post(WEBHOOK_PATH, SimpleRequestHandler(dispatcher=dp, bot=bot))
+    setup_application(app, dp, bot=bot)
+
+    # Запускаем сервер и держим его "висеть"
+    web.run_app(app, host="0.0.0.0", port=10000)
