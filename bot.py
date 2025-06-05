@@ -18,7 +18,7 @@ bot = Bot(token=TOKEN, parse_mode=ParseMode.HTML)
 dp = Dispatcher(storage=MemoryStorage())
 
 # Хендлер
-@dp.message(commands=["/start"])
+@dp.message(F.text=="/start")
 async def cmd_start(message: types.Message):
     await message.answer("🤖 Бот работает через webhook!")
 
