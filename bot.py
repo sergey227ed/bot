@@ -11,7 +11,7 @@ from aiogram.webhook.aiohttp_server import SimpleRequestHandler, setup_applicati
 
 # === Настройки ===
 TOKEN = os.getenv("TOKEN")
-WEBHOOK_HOST = os.getenv("WEBHOOK_HOST", "https://bot-303u.onrender.com")  # ← замени на свой домен, если не используешь переменные
+WEBHOOK_HOST = os.getenv("WEBHOOK_HOST", "https://bot-303u.onrender.com")  # замени на свой Render-домен
 WEBHOOK_PATH = f"/webhook/{TOKEN}"
 WEBHOOK_URL = f"{WEBHOOK_HOST}{WEBHOOK_PATH}"
 
@@ -22,7 +22,7 @@ dp = Dispatcher(storage=MemoryStorage())
 # === Хендлер команды /start ===
 @dp.message(F.text == "/start")
 async def cmd_start(message: types.Message):
-    await message.answer("✅ Привет! Бот работает на webhook!")
+    await message.answer("✅ Бот работает на webhook!")
 
 # === Webhook сервер ===
 async def on_startup(bot: Bot):
@@ -32,3 +32,7 @@ app = web.Application()
 SimpleRequestHandler(dispatcher=dp, bot=bot).register(app, path=WEBHOOK_PATH)
 app.on_startup.append(lambda _: on_startup(bot))
 setup_application(app, dp, bot=bot)
+
+# === ВАЖНО: запуск сервера, чтобы Render не перезапускал ===
+if name == "main":
+    web.run_app(app, host="0.0.0.0", port=int(os.environ.get("PORT", 10000)))
