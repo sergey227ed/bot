@@ -46,6 +46,7 @@ async def sendall_cmd(message: types.Message):
     success, fail = 0, 0
     for user_id in users:
         try:
+            print(f"📤 Рассылка для {user_id}")
             await bot.send_message(user_id, text)
             success += 1
             await asyncio.sleep(0.1)
