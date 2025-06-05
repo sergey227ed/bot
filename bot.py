@@ -1,39 +1,43 @@
 import os
-from aiogram import Bot, Dispatcher, types
-from aiogram.enums import ParseMode
-from aiogram.webhook.aiohttp_server import SimpleRequestHandler, setup_application
+import logging
 from aiohttp import web
+from aiogram import Bot, Dispatcher
+from aiogram.enums import ParseMode
+from aiogram.types import Message
 from aiogram.fsm.storage.memory import MemoryStorage
-from aiogram import Router
+from aiogram.webhook.aiohttp_server import SimpleRequestHandler, setup_application
 
-# Получаем токен и настройки вебхука из переменных окружения
+# Логирование
+logging.basicConfig(level=logging.INFO)
+
+# Переменные окружения
 TOKEN = os.getenv("TOKEN")
-WEBHOOK_PATH = os.getenv("WEBHOOK_PATH", "/webhook")
-WEBHOOK_SECRET = os.getenv("WEBHOOK_SECRET", "supersecret")
-WEBHOOK_HOST = os.getenv("WEBHOOK_HOST", "https://your-app-url.onrender.com")
+WEBHOOK_HOST = os.getenv("WEBHOOK_HOST")  # Например: https://bot-abc123.onrender.com
+WEBHOOK_PATH = "/webhook"
 WEBHOOK_URL = f"{WEBHOOK_HOST}{WEBHOOK_PATH}"
 
-# Создаем бота и диспетчер
+# Создание бота и диспетчера
 bot = Bot(token=TOKEN, parse_mode=ParseMode.HTML)
-storage = MemoryStorage()
-dp = Dispatcher(storage=storage)
+dp = Dispatcher(storage=MemoryStorage())
 
-# Роутер
-router = Router()
-dp.include_router(router)
+# Обработчик команды /start
+@dp.message(commands=["start"])
+async def start_handler(message: Message):
+    await message.answer("Привет! Бот работает через webhook 🎉")
 
-@router.message()
-async def start_handler(message: types.Message):
-    if message.text == "/start":
-        await message.answer("👋 Бот запущен через Webhook!")
+# Приложение aiohttp
+async def on_startup(app: web.Application):
+    await bot.set_webhook(WEBHOOK_URL)
 
-# Настройка и запуск приложения
-async def on_startup(bot: Bot):
-    await bot.set_webhook(WEBHOOK_URL, secret_token=WEBHOOK_SECRET)
+async def on_shutdown(app: web.Application):
+    await bot.delete_webhook()
 
 app = web.Application()
-SimpleRequestHandler(dispatcher=dp, bot=bot, secret_token=WEBHOOK_SECRET).register(app, path=WEBHOOK_PATH)
-setup_application(app, dp, bot=bot, on_startup=on_startup)
+app.on_startup.append(on_startup)
+app.on_shutdown.append(on_shutdown)
 
+SimpleRequestHandler(dispatcher=dp, bot=bot).register(app, path=WEBHOOK_PATH)
+setup_application(app, dp)
 
-    
+if name == "main":
+    web.run_app(app, host="0.0.0.0", port=int(os.getenv("PORT", 1000)))
