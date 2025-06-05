@@ -52,6 +52,11 @@ async def sendall_cmd(message: types.Message):
         except:
             fail += 1
     await message.answer(f"Рассылка завершена. ✅ Успешно: {success}, ❌ Ошибки: {fail}")
-
+@dp.message_handler(commands=['audience'])
+async def audience_cmd(message: types.Message):
+    if str(message.from_user.id) != '7911493553':
+        return
+    users = get_users()
+    await message.answer(f"👥 Аудитория: {len(users)} пользователей")
 if __name__ == '__main__':
     executor.start_polling(dp, skip_updates=True)
