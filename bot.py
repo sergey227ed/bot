@@ -1,63 +1,44 @@
-
-from aiogram import Bot, Dispatcher, types, executor
-import asyncio
+import os
 import logging
+from aiogram import Bot, Dispatcher, types
+from aiogram.enums import ParseMode
+from aiogram.fsm.storage.memory import MemoryStorage
+from aiogram.webhook.aiohttp_server import SimpleRequestHandler, setup_application
+from aiohttp import web
 
-API_TOKEN = '7229050941:AAGkTH895S0qBIDakK_0RAJCtoL6tNw_hzY'
+# Настройки
+TOKEN = os.getenv("BOT_TOKEN")
+WEBHOOK_HOST = os.getenv("WEBHOOK_HOST", "https://твой-проект.onrender.com")  # Замени на свой
+WEBHOOK_PATH = "/webhook"
+WEBHOOK_SECRET = "supersecret"  # Любая строка
+WEBHOOK_URL = WEBHOOK_HOST + WEBHOOK_PATH
 
-logging.basicConfig(level=logging.INFO)
-bot = Bot(token=API_TOKEN)
-dp = Dispatcher(bot)
+# Бот и диспетчер
+bot = Bot(token=TOKEN, parse_mode=ParseMode.HTML)
+dp = Dispatcher(storage=MemoryStorage())
 
-USERS_FILE = "users.txt"
+# Хендлер
+@dp.message(commands=["start"])
+async def cmd_start(message: types.Message):
+    await message.answer("🤖 Бот работает через webhook!")
 
-def save_user(chat_id):
-    try:
-        with open(USERS_FILE, "a+") as f:
-            f.seek(0)
-            users = f.read().splitlines()
-            if str(chat_id) not in users:
-                f.write(f"{chat_id}\n")
-    except:
-        pass
+# Настройки webhook
+async def on_startup(app: web.Application):
+    await bot.set_webhook(WEBHOOK_URL, secret_token=WEBHOOK_SECRET)
+    print("✅ Webhook установлен")
 
-def get_users():
-    try:
-        with open(USERS_FILE, "r") as f:
-            return f.read().splitlines()
-    except:
-        return []
+async def on_shutdown(app: web.Application):
+    await bot.delete_webhook()
+    print("❌ Webhook удалён")
 
-@dp.message_handler(commands=['start'])
-async def start_cmd(message: types.Message):
-    save_user(message.chat.id)
-    await message.answer("✅ Вы подписались на рассылку.")
+# Запуск
+async def main():
+    app = web.Application()
+    SimpleRequestHandler(
+        dispatcher=dp,
+        bot=bot,
+        secret_token=WEBHOOK_SECRET
+    ).register(app, path=WEBHOOK_PATH)
 
-@dp.message_handler(commands=['sendall'])
-async def sendall_cmd(message: types.Message):
-    if str(message.from_user.id) != '7911493553':
-        return await message.answer("🚫 У вас нет прав на рассылку.")
 
-    text = message.text.replace("/sendall", "").strip()
-    if not text:
-        return await message.answer("Напишите текст рассылки после команды.")
-
-    users = get_users()
-    success, fail = 0, 0
-    for user_id in users:
-        try:
-            print(f"📤 Рассылка для {user_id}")
-            await bot.send_message(user_id, text)
-            success += 1
-            await asyncio.sleep(0.1)
-        except:
-            fail += 1
-    await message.answer(f"Рассылка завершена. ✅ Успешно: {success}, ❌ Ошибки: {fail}")
-@dp.message_handler(commands=['audience'])
-async def audience_cmd(message: types.Message):
-    if str(message.from_user.id) != '7911493553':
-        return
-    users = get_users()
-    await message.answer(f"👥 Аудитория: {len(users)} пользователей")
-if __name__ == '__main__':
-    executor.start_polling(dp, skip_updates=True)
+    
