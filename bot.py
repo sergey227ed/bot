@@ -86,6 +86,8 @@ async def audience_size(message: types.Message):
 
     with open("users.txt", "r", encoding="utf-8") as file:
         users = [line.strip() for line in file if line.strip().isdigit()]
+
+        
         await message.answer(f"📊 Актуальная аудитория: {len(users)} человек(а)")
 
 # === Webhook ===
