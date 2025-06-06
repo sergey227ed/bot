@@ -64,14 +64,14 @@ async def broadcast(message: types.Message):
             valid_users.append(user_id)
             success += 1
         except Exception as e:
-            logging.error(f"❌ Не удалось отправить сообщение {user_id}: {e}")
             fail += 1
+            logging.error(f"❌ Не удалось отправить сообщение {user_id}: {e}")
 
-    # Сохраняем только валидных пользователей
+    # Перезапись файла только с рабочими ID
     with open("users.txt", "w", encoding="utf-8") as file:
-        file.write("\n".join(valid_users) + "\n")
+        file.write("\n".join(valid_users))
 
-    await message.answer(f"📢 Рассылка завершена.\n✅ Успешно: {success}\n❌ Ошибок: {fail}")
+    await message.answer(f"✅ Рассылка завершена!\n\nУспешно: {success}\nОшибок: {fail}")
 
 # === Webhook ===
 async def on_startup(bot: Bot):
