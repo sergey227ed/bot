@@ -70,7 +70,9 @@ async def broadcast(message: types.Message):
     # Перезапись файла только с рабочими ID
     with open("users.txt", "w", encoding="utf-8") as file:
         file.write("\n".join(valid_users))
+        
 await message.answer(f"✅ Рассылка завершена!\n\nУспешно: {success}\nОшибок: {fail}")
+
     # === Команда /аудитория — показать размер аудитории ===
 @dp.message(F.text == "/аудитория")
 async def audience_size(message: types.Message):
