@@ -70,8 +70,21 @@ async def broadcast(message: types.Message):
     # Перезапись файла только с рабочими ID
     with open("users.txt", "w", encoding="utf-8") as file:
         file.write("\n".join(valid_users))
+await message.answer(f"✅ Рассылка завершена!\n\nУспешно: {success}\nОшибок: {fail}")
+    # === Команда /аудитория — показать размер аудитории ===
+@dp.message(F.text == "/аудитория")
+async def audience_size(message: types.Message):
+    if message.from_user.id != ADMIN_ID:
+        await message.answer("⛔️ У тебя нет доступа к этой команде.")
+        return
 
-    await message.answer(f"✅ Рассылка завершена!\n\nУспешно: {success}\nОшибок: {fail}")
+    if not os.path.exists("users.txt"):
+        await message.answer("❗️ Файл users.txt не найден.")
+        return
+
+    with open("users.txt", "r", encoding="utf-8") as file:
+        users = [line.strip() for line in file if line.strip().isdigit()]
+        await message.answer(f"📊 Актуальная аудитория: {len(users)} человек(а)")
 
 # === Webhook ===
 async def on_startup(bot: Bot):
