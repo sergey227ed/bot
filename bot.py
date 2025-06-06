@@ -1,9 +1,13 @@
 import logging
 import os
 
-from aiogram import Bot, Dispatcher, F, types from aiogram.enums import ParseMode from aiogram.fsm.storage.memory import MemoryStorage from aiogram.client.default import DefaultBotProperties
+from aiogram import Bot, Dispatcher, F, types 
+from aiogram.enums import ParseMode 
+from aiogram.fsm.storage.memory import MemoryStorage 
+from aiogram.client.default import DefaultBotProperties
 
-from aiohttp import web from aiogram.webhook.aiohttp_server import SimpleRequestHandler, setup_application
+from aiohttp import web 
+from aiogram.webhook.aiohttp_server import SimpleRequestHandler, setup_application
 
 === Настройки ===
 
